@@ -1,52 +1,54 @@
-import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import Drawing from './PayloadPhysics';
+import physics from './physics';
+import * as def from 'lil-gui';
+
+// المشهد
 const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xa0d8f0);
 
-const canvas = document.querySelector("canvas.webgl");
-
-const sizes = {
-  width: window.innerWidth,
-  height: window.innerHeight,
-};
-
-window.addEventListener("resize", () => {
-  sizes.width = window.innerWidth;
-  sizes.height = window.innerHeight;
-  camera.aspect = sizes.width / sizes.height;
-  camera.updateProjectionMatrix();
-  renderer.setSize(sizes.width, sizes.height);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-});
-
-const cube = new THREE.Mesh(
-  new THREE.BoxGeometry(4, 4, 4),
-  new THREE.MeshBasicMaterial({ color: 0xff0000 })
-);
-scene.add(cube);
+// الكاميرا
 const camera = new THREE.PerspectiveCamera(
   75,
-  sizes.width / sizes.height,
+  window.innerWidth / window.innerHeight,
   0.1,
-  100
+  1000
 );
-camera.position.z = 20;
-scene.add(camera);
+camera.position.set(0, 0, 5); // بعيدة شوي ومرفوعة
+camera.lookAt(d1.position);
 
-const controls = new OrbitControls(camera, canvas);
+// الرندر
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
 
-const renderer = new THREE.WebGLRenderer({
-  canvas,
-});
+// إضاءة أساسية قوية
+const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+dirLight.position.set(5, 10, 7.5);
+dirLight.castShadow = true;
+scene.add(dirLight);
 
-renderer.setSize(sizes.width, sizes.height);
-renderer.render(scene, camera);
+// إضاءة محيطة
+const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.6);
+hemiLight.position.set(0, 200, 0);
+scene.add(hemiLight);
+const d=new Drawing(scene);
+const d1=d.good(1,1,1,false).position.set(-6,3,0);
 
-const clock = new THREE.Clock();
+// الأنيميشن
+function animate() {
+  requestAnimationFrame(animate);
 
-const tick = () => {
-  const elapsedTime = clock.getElapsedTime();
 
   renderer.render(scene, camera);
-  window.requestAnimationFrame(tick);
-};
-tick();
+}
+animate();
+
+// تعديل الحجم عند تغيير الشاشة
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
