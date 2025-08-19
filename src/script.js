@@ -17,7 +17,6 @@ const camera = new THREE.PerspectiveCamera(
   1000
 );
 camera.position.set(0, 0, 5); // بعيدة شوي ومرفوعة
-camera.lookAt(d1.position);
 
 // الرندر
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -35,7 +34,8 @@ const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.6);
 hemiLight.position.set(0, 200, 0);
 scene.add(hemiLight);
 const d=new Drawing(scene);
-const d1=d.good(1,1,1,false).position.set(-6,3,0);
+d.good(1,1,1,false)
+
 
 // الأنيميشن
 function animate() {
