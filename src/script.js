@@ -34,7 +34,7 @@ const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.6);
 hemiLight.position.set(0, 200, 0);
 scene.add(hemiLight);
 const d=new Drawing(scene);
-d.good(1,1,1,false)
+
 
 
 // الأنيميشن

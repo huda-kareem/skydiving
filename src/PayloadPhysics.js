@@ -8,61 +8,40 @@ class Drawing {
     this.model = null;
   }
 
-  plane() {
-    const loader = new GLTFLoader();
-    loader.load(
-      '/models/c17.glb',
-      (gltf) => {
-        this.model = gltf.scene;
-        this.scene.add(this.model);
-        this.model.scale.set(0.1, 0.1, 0.1);
-        this.model.position.set(0, 0, 0);
-        this.model.rotation.y = Math.PI / 2;
+  
+plane() {
+  const group = new THREE.Group();
+  group.position.set(0, 0, 0);
+  this.scene.add(group);
 
-        this.model.traverse((child) => {
-          if (child.isMesh) {
-            if (!child.material) {
-              child.material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
-            }
+  const loader = new GLTFLoader();
+  loader.load(
+    '/models/c17.glb',
+    (gltf) => {
+      this.model = gltf.scene;
+      this.model.scale.set(0.1, 0.1, 0.1);
+      this.model.position.set(0, 0, 0);
+      this.model.rotation.y = Math.PI / 2;
+
+      this.model.traverse((child) => {
+        if (child.isMesh) {
+          if (!child.material) {
+            child.material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
           }
-        });
-      },
-      undefined,
-      (error) => {
-        console.error('في مشكلة بالتحميل:', error);
-      }
-    );
-    return this.model;
-  }
-  parachut() {
-    const loader = new GLTFLoader();
-    loader.load(
-      '/models/c14.glb',
-      (gltf) => {
-        this.model = gltf.scene;
-        this.scene.add(this.model);
-        this.model.scale.set(3, 2, 3);
-        this.model.position.set(0, 0, 0);
-        this.model.rotation.y = Math.PI / 2;
+        }
+      });
 
-        this.model.traverse((child) => {
-          if (child.isMesh) {
-            if (!child.material) {
-              child.material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
-            }
-          }
-        });
-        resolve(this.model);
-      },
-      undefined,
-      (error) => {
-        console.error('في مشكلة بالتحميل:', error);
-      }
-    );
-   // return this.model;
-  }
+      // أضف الطائرة للـ group بدل المشهد
+      group.add(this.model);
+    },
+    undefined,
+    (error) => {
+      console.error('في مشكلة بالتحميل:', error);
+    }
+  );
 
-
+  return group;
+}
   good(x,y,z,openParachte){
     if(openParachte){
 
@@ -126,12 +105,7 @@ return cube;
     }  
 }
   
-setposition(x,y,z,model){
-  if(model)
-    model.position.set(x,y,z);
-return model;
-
-}}
+}
 
 
 export default Drawing;
