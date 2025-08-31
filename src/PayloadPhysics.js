@@ -41,71 +41,61 @@ plane() {
   );
 
   return group;
-}
-  good(x,y,z,openParachte){
-    if(openParachte){
-
+}good(x, y, z, openParachte) {
   const group = new THREE.Group();
-  group.position.set(0,0,0);
+  group.position.set(0, 0, 0);
   this.scene.add(group);
 
-  // 2. نضيف الحمولة (مكعب خشب)
+  // 🟫 المكعب (دائمًا موجود)
   const textureLoader = new THREE.TextureLoader();
   const texture = textureLoader.load('/image/WOOD.jpg');
   const geometry = new THREE.BoxGeometry(1, 1, 1);
   const material = new THREE.MeshStandardMaterial({ map: texture });
   const cube = new THREE.Mesh(geometry, material);
-  cube.position.set(0, -2.5, 0); // المكعب تحت المظلة
+  cube.position.set(0, -2.5, 0); // ثابت تحت
   group.add(cube);
 
-  // 3. نعمل placeholder للمظلة
-  const placeholder = new THREE.Mesh(
-    new THREE.SphereGeometry(2, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2),
-    new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true })
-  );
-  placeholder.position.set(0, 0, 0);
-  group.add(placeholder);
+  // 🎈 التعامل مع المظلة فقط
+  if (openParachte) {
+    // مظلة مؤقتة (placeholder)
+    const placeholder = new THREE.Mesh(
+      new THREE.SphereGeometry(2, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2),
+      new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true })
+    );
+    placeholder.name = "parachute"; 
+    group.add(placeholder);
 
-  // 4. نحمل المظلة GLTF
-  const loader = new GLTFLoader();
-  loader.load(
-    '/models/c14.glb',
-    (gltf) => {
-      const parachute = gltf.scene;
-      parachute.scale.set(3, 2, 3);
-      parachute.position.set(0, 0, 0);
-      parachute.rotation.y = Math.PI / 2;
+    // تحميل المظلة GLTF
+    const loader = new GLTFLoader();
+    loader.load(
+      '/models/c14.glb',
+      (gltf) => {
+        const parachute = gltf.scene;
+        parachute.scale.set(3, 2, 3);
+        parachute.position.set(0, 0, 0);
+        parachute.rotation.y = Math.PI / 2;
+        parachute.name = "parachute";
 
-      // تبديل placeholder بالمظلة الحقيقية
-      group.remove(placeholder);
-      group.add(parachute);
-    },
-    undefined,
-    (error) => {
-      console.error('في مشكلة بتحميل المظلة:', error);
+        // تبديل placeholder بالمظلة الحقيقية
+        const oldPara = group.getObjectByName("parachute");
+        if (oldPara) group.remove(oldPara);
+        group.add(parachute);
+      },
+      undefined,
+      (error) => {
+        console.error('في مشكلة بتحميل المظلة:', error);
+      }
+    );
+  } else {
+    // إذا false → نحذف المظلة فقط
+    const oldParachute = group.getObjectByName("parachute");
+    if (oldParachute) {
+      group.remove(oldParachute);
     }
-  );
+  }
+
   return group;
-    }
-    else{
-    const textureLoader = new THREE.TextureLoader();
-const texture = textureLoader.load(
-  '/image/WOOD.jpg',
-  () => {
-    renderer.render(scene, camera);
-  },
-  undefined,
-  (err) => { console.error('Error loading texture', err); }
-);
-const geometry = new THREE.BoxGeometry(x, y, z);
-const material = new THREE.MeshStandardMaterial({ map: texture });
-const cube = new THREE.Mesh(geometry, material);
-this.scene.add(cube);
-return cube;
-    }  
-}
-  
-}
+}}
 
 
 export default Drawing;
