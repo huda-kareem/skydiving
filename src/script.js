@@ -37,7 +37,7 @@ physics.windVz = 2;
 // --- الطائرة والحمولة ---
 const d = new Drawing(scene);
 let payLoadDropped = false;
-let payloadGroup = d.good(1, 1, 1, physics.parachuteOpen); // حمولة + مظلة
+let payloadGroup = d.good(20, 20, 20, physics.parachuteOpen); // حمولة + مظلة
 const airPlane = d.plane();
 airPlane.position.set(0, 4000, 0);
 
@@ -145,8 +145,8 @@ function openParachute() {
         '/models/c14.glb',
         (gltf) => {
           const parachuteMesh = gltf.scene;
-          parachuteMesh.scale.set(3, 2, 3);
-          parachuteMesh.position.set(0, 0, 0);
+          parachuteMesh.scale.set(30, 30, 30);
+          parachuteMesh.position.set(0, 30, 0);
           parachuteMesh.rotation.y = Math.PI / 2;
           parachuteMesh.name = "parachute";
 

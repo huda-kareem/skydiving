@@ -53,8 +53,8 @@ good(x, y, z, openParachte) {
   const geometry = new THREE.BoxGeometry(1, 1, 1);
   const material = new THREE.MeshStandardMaterial({ map: texture });
   const cube = new THREE.Mesh(geometry, material);
-  cube.position.set(0, -2.5, 0); 
-  cube.scale.set(20,20,20);
+  cube.position.set(0, 0, 0); 
+  cube.scale.set(x,y,z);
   group.add(cube);
   
 
