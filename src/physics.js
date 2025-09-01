@@ -74,29 +74,33 @@ export default physics;*/
 
 
 
-
 class Physics {
   mass = 10;             
-  g = 100;             
+  g = 9.8;             
   cd = 0.8; // معامل السحب
-  A_closed = 0.23 * 0.23;  
+  goodwidth = 0.23;
+  goodhieght = 0.23
+  A_closed = this.goodwidth * this.goodhieght;  
   A_open = Math.PI * Math.pow(1.2, 2); 
   parachuteOpen = false;
 
 
   x = 0;
-  y = 2000;  
+  y = 600;  
   z = 0;
-  vx = 0;
+  vx = 25;
   vy = 0;
   vz = 0;
+  velocity= Math.sqrt(Math.pow(this.vx,2)+Math.pow(this.vy,2)+Math.pow(this.vz,2));
+  acceleration = 0;
+  airDrag = 0;
+  hieghtopen ;
 
-  // سرعة الرياح (يمكنك تعديلها ديناميكياً)
   windVx = 0; 
   windVy = 0; // عادة 0 (لا يوجد رياح عمودية)
   windVz = 0;
 
-  startTime = Date.now();
+  startTime ;
 
   p0 = 101325;    
   t0 = 288.15;    
@@ -149,8 +153,14 @@ class Physics {
 
     this.vz += az * dt;
     this.z += this.vz * dt;
+    this.velocity = Math.sqrt(Math.pow(this.vx,2)+Math.pow(this.vy,2)+Math.pow(this.vz,2));
+this.acceleration = Math.sqrt(Math.pow(az,2)+Math.pow(ay,2)+Math.pow(az,2));
+    this.airDrag = Math.sqrt(Math.pow(this.Fd_x,2)+Math.pow(this.Fd_y,2)+Math.pow(this.Fd_z,2));
+    this.hieghtopen = this.vx+0.5*this.g+this.velocity*2;
 
     if (this.y < 0) {
+      this.windVx = 0;
+      this.windVz = 0;
       this.y = 0;
       this.vy = 0;
     }
@@ -158,3 +168,4 @@ class Physics {
 }
 
 export default Physics;
+

@@ -19,7 +19,7 @@ plane() {
     '/models/c17.glb',
     (gltf) => {
       this.model = gltf.scene;
-      this.model.scale.set(0.1, 0.1, 0.1);
+      this.model.scale.set(2, 2, 2);
       this.model.position.set(0, 0, 0);
       this.model.rotation.y = Math.PI / 2;
 
@@ -41,21 +41,24 @@ plane() {
   );
 
   return group;
-}good(x, y, z, openParachte) {
+}
+good(x, y, z, openParachte) {
   const group = new THREE.Group();
   group.position.set(0, 0, 0);
   this.scene.add(group);
 
-  // 🟫 المكعب (دائمًا موجود)
+  //  المكعب 
   const textureLoader = new THREE.TextureLoader();
   const texture = textureLoader.load('/image/WOOD.jpg');
   const geometry = new THREE.BoxGeometry(1, 1, 1);
   const material = new THREE.MeshStandardMaterial({ map: texture });
   const cube = new THREE.Mesh(geometry, material);
-  cube.position.set(0, -2.5, 0); // ثابت تحت
+  cube.position.set(0, -2.5, 0); 
+  cube.scale.set(20,20,20);
   group.add(cube);
+  
 
-  // 🎈 التعامل مع المظلة فقط
+  //    المظلة 
   if (openParachte) {
     // مظلة مؤقتة (placeholder)
     const placeholder = new THREE.Mesh(
@@ -65,7 +68,6 @@ plane() {
     placeholder.name = "parachute"; 
     group.add(placeholder);
 
-    // تحميل المظلة GLTF
     const loader = new GLTFLoader();
     loader.load(
       '/models/c14.glb',
@@ -76,7 +78,6 @@ plane() {
         parachute.rotation.y = Math.PI / 2;
         parachute.name = "parachute";
 
-        // تبديل placeholder بالمظلة الحقيقية
         const oldPara = group.getObjectByName("parachute");
         if (oldPara) group.remove(oldPara);
         group.add(parachute);
@@ -87,7 +88,6 @@ plane() {
       }
     );
   } else {
-    // إذا false → نحذف المظلة فقط
     const oldParachute = group.getObjectByName("parachute");
     if (oldParachute) {
       group.remove(oldParachute);
@@ -95,7 +95,8 @@ plane() {
   }
 
   return group;
-}}
+}
+}
 
 
 export default Drawing;

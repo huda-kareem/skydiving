@@ -6,35 +6,12 @@ import GUI from 'lil-gui';
 
 // --- المشهد ---
 const scene = new THREE.Scene();
-
-let materialArray = [];
-let texture_ft = new THREE.TextureLoader().load('/image/px.jpg');
-let texture_bk = new THREE.TextureLoader().load('/image/nx.jpg');
-let texture_up = new THREE.TextureLoader().load('/image/py.jpg');
-let texture_dn = new THREE.TextureLoader().load('/image/ny.jpg');
-let texture_rt = new THREE.TextureLoader().load('/image/pz.jpg');
-let texture_lf = new THREE.TextureLoader().load('/image/nz.jpg');
-
-materialArray.push(new THREE.MeshBasicMaterial({ map: texture_ft }));
-materialArray.push(new THREE.MeshBasicMaterial({ map: texture_bk }));
-materialArray.push(new THREE.MeshBasicMaterial({ map: texture_up }));
-materialArray.push(new THREE.MeshBasicMaterial({ map: texture_dn }));
-materialArray.push(new THREE.MeshBasicMaterial({ map: texture_rt }));
-materialArray.push(new THREE.MeshBasicMaterial({ map: texture_lf }));
-
-for (let i = 0; i < 6; i++) materialArray[i].side = THREE.BackSide;
-
-let skyboxGeo = new THREE.BoxGeometry(3000, 5000, 3000);
-let skybox = new THREE.Mesh(skyboxGeo, materialArray);
-skybox.position.set(0, 0, 0);
-scene.add(skybox);
-
 // --- الكاميرا ---
 const camera = new THREE.PerspectiveCamera(
   75,
   window.innerWidth / window.innerHeight,
   0.1,
-  5000
+  30000 // توسيع الرؤية لتغطي Skybox
 );
 
 // --- الرندر ---
@@ -62,32 +39,63 @@ const d = new Drawing(scene);
 let payLoadDropped = false;
 let payloadGroup = d.good(1, 1, 1, physics.parachuteOpen); // حمولة + مظلة
 const airPlane = d.plane();
-airPlane.position.set(0, 2000, 0);
+airPlane.position.set(0, 4000, 0);
 
 if (airPlane && payloadGroup) {
   payloadGroup.position.copy(airPlane.position);
 }
+
+let materialArray = [];
+let texture_ft = new THREE.TextureLoader().load( '/image/px.png');
+let texture_bk = new THREE.TextureLoader().load( '/image/nx.png');
+let texture_up = new THREE.TextureLoader().load( '/image/py.png');
+let texture_dn = new THREE.TextureLoader().load( '/image/ny.png');
+let texture_rt = new THREE.TextureLoader().load( '/image/pz.png');
+let texture_lf = new THREE.TextureLoader().load( '/image/nz.png');
+  
+materialArray.push(new THREE.MeshBasicMaterial( { map: texture_ft }));
+materialArray.push(new THREE.MeshBasicMaterial( { map: texture_bk }));
+materialArray.push(new THREE.MeshBasicMaterial( { map: texture_up }));
+materialArray.push(new THREE.MeshBasicMaterial( { map: texture_dn }));
+materialArray.push(new THREE.MeshBasicMaterial( { map: texture_rt }));
+materialArray.push(new THREE.MeshBasicMaterial( { map: texture_lf }));
+
+for (let i = 0; i < 6; i++)
+  materialArray[i].side = THREE.BackSide;
+   
+let skyboxGeo = new THREE.BoxGeometry( 20000,5000 , 20000);
+let skybox = new THREE.Mesh( skyboxGeo, materialArray );
+skybox.position.y = 2495;
+scene.add( skybox );
 
 let payloadDroppedInitialized = false;
 
 // --- UI (لوحة تحكم) ---
 const gui = new GUI();
 const controls = {
+  plane_velocity: physics.vx,
+  plane_hieght: physics.y,
   gravity: physics.g,
   mass: physics.mass,
   windStrength: 5,
-  height:1,
-  width:1,
+  height:physics.goodhieght,
+  width:physics.goodwidth,
   windDirection: 0, // زاوية بالدرجات
   dropPayload: () => dropPayload(),
   openParachute: () => openParachute(),
   restart: () => resetSimulation(),
 };
-gui.add(controls, 'height').onChange(() => {
-
+gui.add(controls, 'plane_velocity').onChange((val) => {
+physics.vx = val;
 });
-gui.add(controls, 'width').onChange(() => {
-  
+gui.add(controls, 'plane_hieght',0,10000).onChange((val) => {
+physics.y = val;
+});
+gui.add(controls, 'height').onChange((val) => {
+physics.goodhieght = val;
+});
+gui.add(controls, 'width').onChange((val) => {
+  physics.goodwidth = val;
 });
 gui.add(controls, 'gravity').onChange((val) => {
   physics.g = val;
@@ -110,6 +118,7 @@ gui.add(controls, 'restart');
 // --- دوال التحكم ---
 function dropPayload() {
   if (!payLoadDropped) {
+    physics.startTime = Date.now();
     payLoadDropped = true;
     payloadDroppedInitialized = false;
     payloadGroup.visible = true;
@@ -156,12 +165,13 @@ function openParachute() {
 
 
 function resetSimulation() {
+  physics.startTime = Date.now();
     payLoadDropped = false;
     payloadDroppedInitialized = false;
 
     // إعادة موضع الفيزياء
     physics.x = 0;
-    physics.y = 2000;
+    physics.y = 600;
     physics.z = 0;
     physics.vx = 0;
     physics.vy = 0;
@@ -169,7 +179,7 @@ function resetSimulation() {
     physics.parachuteOpen = false;
 
     // إعادة موضع الطائرة
-    airPlane.position.set(0, 2000, 0);
+    airPlane.position.set(0, 8000, 0);
 
     // إزالة المظلة القديمة
     if (payloadGroup) {
@@ -183,13 +193,32 @@ function resetSimulation() {
     payloadGroup.visible = false;
 }
 
+//واجهة العرض
+const hud = document.getElementById('hud');
+const hudpositionx = document.getElementById('hudpositionx');
+const hudpositiony = document.getElementById('hudpositiony');
+const hudpositionz = document.getElementById('hudpositionz');
+const hudairdentisy = document.getElementById('hudairdentisy');
+const hudacceleration = document.getElementById('hudacceleration');
+
+
+const cursor = {
+  x : 0 , 
+  y: 0
+}
+window.addEventListener('mousemove', (event) =>
+{
+    cursor.x = event.clientX / window.innerWidth - 0.5
+    cursor.y = - (event.clientY / window.innerHeight - 0.5)
+}) ; 
+
 // --- أنيميشن ---
 function animate() {
   requestAnimationFrame(animate);
 
   // تحريك الطائرة
   if (airPlane) {
-    airPlane.position.add(new THREE.Vector3(3, 0, 0));
+    airPlane.position.x += 3;
   }
 
   // تحديث الحمولة
@@ -197,13 +226,21 @@ function animate() {
     if (!payloadDroppedInitialized) {
       payloadGroup.visible = true;
       physics.x = airPlane.position.x;
-      physics.y = airPlane.position.y;
       physics.z = airPlane.position.z;
       payloadDroppedInitialized = true;
     }
-
-    physics.update();
     payloadGroup.position.set(physics.x, physics.y, physics.z);
+    physics.update();
+            if(physics.y <= physics.hieghtopen){
+          openParachute();
+        }
+    physics.velocity
+    hud.textContent = `velocity : ${physics.velocity}`
+    hudacceleration.textContent = `Acceleration : ${physics.acceleration}`
+    hudpositionx.textContent = `position on x : ${physics.x}`
+    hudpositiony.textContent = `position on y : ${physics.y}`
+    hudpositionz.textContent = `position on z : ${physics.z}`
+    hudairdentisy.textContent = `Air dentisy : ${physics.airDensity(physics.y)}`;
 
     if (physics.y <= 0) {
       const parachute = payloadGroup.getObjectByName('parachute');
@@ -212,17 +249,33 @@ function animate() {
       }
     }
   } else {
+    hud.textContent = `velocity : ${physics.velocity}`
+        hudacceleration.textContent = `Acceleration : ${physics.acceleration}`
+   hudpositionx.textContent = `position on x : ${airPlane.position.x}`
+    hudpositiony.textContent = `position on y : ${physics.y}`
+    hudpositionz.textContent = `position on z : ${airPlane.position.z}`
+        hudairdentisy.textContent = `Air dentisy : ${physics.airDensity(physics.y)}`
+
+
     payloadGroup.position.copy(airPlane.position);
     payloadGroup.visible = false;
   }
 
   // الكاميرا
-  if (payloadGroup) {
-    const offset = new THREE.Vector3(4, 3, 6);
-    camera.position.copy(payloadGroup.position).add(offset);
-    camera.lookAt(payloadGroup.position);
-  }
-
+  if(payloadGroup)
+    { 
+      camera.position.x = payloadGroup.position.x +  Math.sin(cursor.x * Math.PI * 2) *130; 
+      camera.position.z= payloadGroup.position.z + Math.cos(cursor.x * Math.PI * 2) *130*4 ; 
+      camera.position.y = payloadGroup.position.y ; 
+      camera.lookAt(new THREE.Vector3(payloadGroup.position.x, payloadGroup.position.y, payloadGroup.position.z)); ; 
+    }
+    else
+    {
+      camera.position.x = airplane.position.x   ; 
+      camera.position.z= airplane.position.z -3  ; 
+      camera.position.y = airplane.position.y +1.8 ; 
+      camera.lookAt(new THREE.Vector3(airplane.position.x, airplane.position.y, airplane.position.z)); ; 
+    }
   renderer.render(scene, camera);
 }
 animate();
